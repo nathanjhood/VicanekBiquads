@@ -20,6 +20,7 @@ ProcessWrapper<SampleType>::ProcessWrapper(VicanekBiquadAudioProcessor& p)
     frequencyPtr(dynamic_cast <juce::AudioParameterFloat*> (p.getAPVTS().getParameter("frequencyID"))),
     resonancePtr(dynamic_cast <juce::AudioParameterFloat*> (p.getAPVTS().getParameter("bandwidthID"))),
     gainPtr(dynamic_cast <juce::AudioParameterFloat*> (p.getAPVTS().getParameter("gainID"))),
+    typePtr(dynamic_cast <juce::AudioParameterChoice*> (p.getAPVTS().getParameter("typeID"))),
     transformPtr(dynamic_cast <juce::AudioParameterChoice*> (p.getAPVTS().getParameter("transformID"))),
     outputPtr(dynamic_cast <juce::AudioParameterFloat*> (p.getAPVTS().getParameter("outputID"))),
     mixPtr(dynamic_cast <juce::AudioParameterFloat*> (p.getAPVTS().getParameter("mixID")))
@@ -27,6 +28,7 @@ ProcessWrapper<SampleType>::ProcessWrapper(VicanekBiquadAudioProcessor& p)
     jassert(frequencyPtr != nullptr);
     jassert(resonancePtr != nullptr);
     jassert(gainPtr != nullptr);
+    jassert(typePtr != nullptr);
     jassert(transformPtr != nullptr);
     jassert(outputPtr != nullptr);
     jassert(mixPtr != nullptr);
@@ -76,9 +78,9 @@ void ProcessWrapper<SampleType>::update()
     mixer.setWetMixProportion(mixPtr->get() * 0.01f);
 
     filter.setFrequency(frequencyPtr->get());
-    filter.setResonance(resonancePtr->get());
+    filter.setResonance(resonancePtr->get() * 10.f);
     filter.setGain(gainPtr->get());
-
+    filter.setFilterType(static_cast<FilterType>(typePtr->getIndex()));
     filter.setTransformType(static_cast<TransformationType>(transformPtr->getIndex()));
     output.setGainDecibels(outputPtr->get());
 };
