@@ -40,7 +40,7 @@ template <typename SampleType>
 void MatchedBiquad<SampleType>::setResonance(SampleType newRes)
 {
 
-    if (q != juce::jlimit(0.1, 100, newRes))
+    if (q != newRes)
     {
         q = newRes;
         coeffs();
@@ -135,7 +135,7 @@ SampleType MatchedBiquad<SampleType>::directFormI(int channel, SampleType inputS
     auto& Xn = inputSample;
     auto& Yn = outputSample;
 
-    Yn = ((Xn * b0) + (Xn1 * b1) + (Xn2 * b2) + (Yn1 * a1) + (Yn2 * a2));
+    Yn = ((Xn * b[0]) + (Xn1 * b[1]) + (Xn2 * b[2]) + (Yn1 * a[1]) + (Yn2 * a[2]));
 
     Xn2 = Xn1;
     Yn2 = Yn1;
@@ -155,8 +155,8 @@ SampleType MatchedBiquad<SampleType>::directFormII(int channel, SampleType input
     auto& Xn = inputSample;
     auto& Yn = outputSample;
 
-    Wn = (Xn + ((Wn1 * a1) + (Wn2 * a2)));
-    Yn = ((Wn * b0) + (Wn1 * b1) + (Wn2 * b2));
+    Wn = (Xn + ((Wn1 * a[1]) + (Wn2 * a[2])));
+    Yn = ((Wn * b[0]) + (Wn1 * b[1]) + (Wn2 * b[2]));
 
     Wn2 = Wn1;
     Wn1 = Wn;
@@ -177,12 +177,12 @@ SampleType MatchedBiquad<SampleType>::directFormITransposed(int channel, SampleT
     auto& Yn = outputSample;
 
     Wn = (Xn + Wn2);
-    Yn = ((Wn * b0) + Xn2);
+    Yn = ((Wn * b[0]) + Xn2);
 
-    Xn2 = ((Wn * b1) + Xn1);
-    Wn2 = ((Wn * a1) + Wn1);
-    Xn1 = (Wn * b2);
-    Wn1 = (Wn * a2);
+    Xn2 = ((Wn * b[1]) + Xn1);
+    Wn2 = ((Wn * a[1]) + Wn1);
+    Xn1 = (Wn * b[2]);
+    Wn1 = (Wn * a[2]);
 
     return Yn;
 }
@@ -196,10 +196,10 @@ SampleType MatchedBiquad<SampleType>::directFormIITransposed(int channel, Sample
     auto& Xn = inputSample;
     auto& Yn = outputSample;
 
-    Yn = ((Xn * b0) + (Xn2));
+    Yn = ((Xn * b[0]) + (Xn2));
 
-    Xn2 = ((Xn * b1) + (Xn1) + (Yn * a1));
-    Xn1 = ((Xn * b2) + (Yn * a2));
+    Xn2 = ((Xn * b[1]) + (Xn1)+(Yn * a[1]));
+    Xn1 = ((Xn * b[2]) + (Yn * a[2]));
 
     return Yn;
 }
@@ -207,8 +207,8 @@ SampleType MatchedBiquad<SampleType>::directFormIITransposed(int channel, Sample
 template <typename SampleType>
 void MatchedBiquad<SampleType>::coeffs()
 {
-    f0 = f / (static_cast<SampleType>sampleRate / two);
-    AA = std::pow(10.0, g / 20.0);
+    f0 = f / (static_cast<SampleType>(sampleRate) / two);
+    AA = std::pow(ten, g / twenty);
 
     switch (type)
     {
@@ -218,14 +218,14 @@ void MatchedBiquad<SampleType>::coeffs()
 
         // Poles
         
-        a0 = one;
-        a1 = minusTwo * std::cos(f0 * pi) / (one + alfa);
-        a2 = (one - alfa) / (one + alfa);
+        a_[0] = one;
+        a_[1] = minusTwo * std::cos(f0 * pi) / (one + alfa);
+        a_[2] = (one - alfa) / (one + alfa);
 
         // Zeros
-        b0 = (one + AA * alfa) / (one + alfa);
-        b1 = a1;
-        b2 = (one - AA * alfa) / (one + alfa);
+        b_[0] = (one + AA * alfa) / (one + alfa);
+        b_[1] = a_[1];
+        b_[2] = (one - AA * alfa) / (one + alfa);
 
         break;
 
@@ -234,14 +234,14 @@ void MatchedBiquad<SampleType>::coeffs()
         alfa = std::sin(f0 * pi) / (two * q);
 
         // Poles
-        a0 = one;
-        a1 = minusTwo * std::cos(f0 * pi) / (one + alfa);
-        a2 = (one - alfa) / (one + alfa);
+        a_[0] = one;
+        a_[1] = minusTwo * std::cos(f0 * pi) / (one + alfa);
+        a_[2] = (one - alfa) / (one + alfa);
 
         // Zeros
-        b0 = (one - a1 + a2) / (two * two);
-        b1 = minusTwo * b0;
-        b2 = b0;
+        b_[0] = (one - a_[1] + a_[2]) / (two * two);
+        b_[1] = minusTwo * b_[0];
+        b_[2] = b_[0];
 
         break;
 
@@ -250,14 +250,14 @@ void MatchedBiquad<SampleType>::coeffs()
         alfa = std::sin(f0 * pi) / (two * q);
 
         // Poles
-        a0 = one;
-        a1 = minusTwo * std::cos(f0 * pi) / (one + alfa);
-        a2 = (one - alfa) / (one + alfa);
+        a_[0] = one;
+        a_[1] = minusTwo * std::cos(f0 * pi) / (one + alfa);
+        a_[2] = (one - alfa) / (one + alfa);
 
         // # Zeros
-        b0 = (one + a1 + a2) / (two * two);
-        b1 = two * b0;
-        b2 = b0;
+        b_[0] = (one + a_[1] + a_[2]) / (two * two);
+        b_[1] = two * b_[0];
+        b_[2] = b_[0];
 
         break;
 
@@ -266,17 +266,24 @@ void MatchedBiquad<SampleType>::coeffs()
         alfa = std::sin(f0 * pi) / (two * q);
 
         // Poles
-        a0 = one;
-        a1 = minusTwo * std::cos(f0 * pi) / (one + alfa);
-        a2 = (one - alfa) / (one + alfa);
+        a_[0] = one;
+        a_[1] = minusTwo * std::cos(f0 * pi) / (one + alfa);
+        a_[2] = (one - alfa) / (one + alfa);
 
         // Zeros
-        b0 = (one - a2) / two;
-        b1 = zero;
-        b2 = -b0;
+        b_[0] = (one - a_[2]) / two;
+        b_[1] = zero;
+        b_[2] = -b_[0];
 
         break;
     }
+
+    a[0] = (one / a_[0]);
+    a[1] = ((-a_[1]) * a[0]);
+    a[2] = ((-a_[2]) * a[0]);
+    b[0] = (b_[0] * a[0]);
+    b[1] = (b_[1] * a[0]);
+    b[2] = (b_[2] * a[0]);
 }
 
 template <typename SampleType>

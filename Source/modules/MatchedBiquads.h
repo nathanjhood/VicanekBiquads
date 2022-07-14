@@ -122,7 +122,15 @@ private:
     SampleType directFormITransposed(int channel, SampleType inputValue);
     SampleType directFormIITransposed(int channel, SampleType inputValue);
 
-    Coefficient<SampleType> a0, a1, a2, b0, b1, b2;
+    //Coefficient<SampleType> a0, a1, a2, b0, b1, b2;
+
+    //==========================================================================
+    /** Coefficient gain */
+    Coefficient<SampleType> a[3], b[3];
+
+    /** Coefficient calculation */
+    SampleType a_[3];
+    SampleType b_[3];
 
     std::vector<SampleType> Wn_1, Wn_2, Xn_1, Xn_2, Yn_1, Yn_2;
 
@@ -132,7 +140,7 @@ private:
 
     //==========================================================================
     /** Initialised constant */
-    const SampleType zero = 0.0, one = 1.0, two = 2.0, minusOne = -1.0, minusTwo = -2.0;
+    const SampleType zero = 0.0, one = 1.0, two = 2.0, minusOne = -1.0, minusTwo = -2.0, ten = 10.0, twenty = 20.0;
     const SampleType pi = juce::MathConstants<SampleType>::pi;
     const SampleType root2 = juce::MathConstants<SampleType>::sqrt2;
     double sampleRate = 44100.0;
