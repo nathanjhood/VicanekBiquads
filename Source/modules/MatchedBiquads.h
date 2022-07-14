@@ -27,9 +27,9 @@ enum struct FilterType
     PeakEQ, 
     HighPass, 
     LowPass,
-    BandPass
-    /*MPeakEQ, 
-    MHighPass, 
+    BandPass,
+    MPeakEQ 
+    /*MHighPass, 
     MLowPass, 
     MBandPass*/
 };
@@ -122,8 +122,6 @@ private:
     SampleType directFormITransposed(int channel, SampleType inputValue);
     SampleType directFormIITransposed(int channel, SampleType inputValue);
 
-    //Coefficient<SampleType> a0, a1, a2, b0, b1, b2;
-
     //==========================================================================
     /** Coefficient gain */
     Coefficient<SampleType> a[3], b[3];
@@ -140,7 +138,7 @@ private:
 
     //==========================================================================
     /** Initialised constant */
-    const SampleType zero = 0.0, one = 1.0, two = 2.0, minusOne = -1.0, minusTwo = -2.0, ten = 10.0, twenty = 20.0;
+    const SampleType zero = 0.0, one = 1.0, two = 2.0, minusOne = -1.0, minusTwo = -2.0, zeroFive = 0.5, four = 4.0, ten = 10.0, twenty = 20.0;
     const SampleType pi = juce::MathConstants<SampleType>::pi;
     const SampleType root2 = juce::MathConstants<SampleType>::sqrt2;
     double sampleRate = 44100.0;
