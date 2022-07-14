@@ -207,6 +207,9 @@ SampleType MatchedBiquad<SampleType>::directFormIITransposed(int channel, Sample
 template <typename SampleType>
 void MatchedBiquad<SampleType>::coeffs()
 {
+    auto cosh = [&](SampleType z) { return (std::exp(z) + std::exp(-z)) * zeroFive; };
+    auto powTwo = [&](SampleType x) { return x * x; };
+
     f0 = f / (static_cast<SampleType>(sampleRate) / two);
     AA = std::pow(ten, g / twenty);
 
@@ -274,6 +277,45 @@ void MatchedBiquad<SampleType>::coeffs()
         b_[0] = (one - a_[2]) / two;
         b_[1] = zero;
         b_[2] = -b_[0];
+
+        break;
+
+    case FilterType::MPeakEQ:
+
+        // Poles
+        a_[0] = one;
+        a_[2] = std::exp((- zeroFive) * pi * f0 / (std::sqrt(AA) * q));
+        //_test = four * AA * q * q;
+
+        (four * AA * q * q > one) ?   // complex conjugate poles
+            (
+                a_[1] = minusTwo * a_[2] * std::cos(std::sqrt(one - one / (four * AA * q * q)) * pi * f0);
+        ) :                 // real poles
+            (
+                a_[1] = minusTwo * a_[2] * cosh(std::sqrt(one / (four * AA * q * q) - one) * pi * f0);
+        );
+        a_[2] = a_[2] * a_[2];
+
+        // Zeros
+        const auto AA0 = powTwo(one + a_[1] + a_[2]);
+        const auto AA1 = powTwo(one - a_[1] + a_[2]);
+        const auto AA2 = (-four) * a_[2];
+
+        const auto phi1 = powTwo(std::sin(zeroFive * pi * f0));
+        const auto phi0 = one - phi1;
+        const auto phi2 = four * phi0 * phi1;
+
+        const auto r1 = powTwo((phi0 * AA0 + phi1 * AA1 + phi2 * AA2) * AA);
+        const auto r2 = powTwo((AA1 - AA0 + four * (phi0 - phi1) * AA2) * AA);
+
+        const auto BB0 = AA0;
+        const auto BB2 = (r1 - phi1 * r2 - BB0) / (powTwo(four * phi1));
+        const auto BB1 = r2 + BB0 + four * (phi1 - phi0) * BB2;
+
+        b_[1] = zeroFive * (one + a_[1] + a_[2] - std::sqrt(BB1));
+        const auto w = one + a_[1] + a_[2] - b_[1];
+        b_[0] = zeroFive * (w + std::sqrt(w ^ 2 + BB2));
+        b_[2] = -BB2 / (four * b_[0]);
 
         break;
     }
