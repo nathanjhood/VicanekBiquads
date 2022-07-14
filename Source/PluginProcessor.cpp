@@ -139,15 +139,18 @@ int VicanekBiquadAudioProcessor::getCurrentProgram()
 
 void VicanekBiquadAudioProcessor::setCurrentProgram (int index)
 {
+    juce::ignoreUnused(index);
 }
 
 const juce::String VicanekBiquadAudioProcessor::getProgramName (int index)
 {
+    juce::ignoreUnused(index);
     return {};
 }
 
 void VicanekBiquadAudioProcessor::changeProgramName (int index, const juce::String& newName)
 {
+    juce::ignoreUnused(index, newName);
 }
 
 //==============================================================================
