@@ -13,32 +13,37 @@
 #include "Coefficient.h"
 
 template <typename SampleType>
-Coefficient<SampleType>::Coefficient(SampleType init) : value(init)
+Coefficient<SampleType>::Coefficient() : value()
 {
 }
 
-template <typename SampleType>
-Coefficient<SampleType>::~Coefficient()
-{
-    static_assert (std::atomic<SampleType>::is_always_lock_free,
-        "Coefficient requires a lock-free std::atomic<float>");
-}
+//template <typename SampleType>
+//Coefficient<SampleType>::Coefficient(const Coefficient& other) : value(other.get())
+//{
+//}
+
+//template <typename SampleType>
+//Coefficient<SampleType>::~Coefficient()
+//{
+//    static_assert (std::atomic<SampleType>::is_always_lock_free,
+//        "This class can only be used for lock-free types");
+//}
 
 template <typename SampleType>
 SampleType Coefficient<SampleType>::getValue() const
-{ 
-    return value;
+{
+    return value.load();
 }
 
 template <typename SampleType>
 void Coefficient<SampleType>::setValue(SampleType newValue)
-{ 
-    value = newValue; 
-    valueChanged(get()); 
+{
+    value.store(newValue);
+    valueChanged(get());
 }
 
 template <typename SampleType>
-void Coefficient<SampleType>::valueChanged(SampleType) 
+void Coefficient<SampleType>::valueChanged(SampleType)
 {
 }
 
