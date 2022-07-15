@@ -27,7 +27,7 @@ void Parameters::setParameterLayout(Params& params)
     const auto mixRange = juce::NormalisableRange<float>(00.00f, 100.00f, 0.01f, 1.00f);
     const auto outputRange = juce::NormalisableRange<float>(dBOut, dBMax, 0.01f, 1.00f);
 
-    const auto fString = juce::StringArray({ "PeakEQ", "HighPass", "LowPass", "BandPass", "MPeak" });
+    const auto fString = juce::StringArray({ "PeakEQ", "HighPass", "LowPass", "BandPass", "MPeak", "MHighPass"});
     const auto tString = juce::StringArray({ "DFI", "DFII", "DFI t", "DFII t" });
 
     const auto decibels = juce::String{ ("dB") };
