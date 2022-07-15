@@ -2,8 +2,10 @@
   ==============================================================================
 
     MatchedBiquads.cpp
+    Author:  Martin Vicanek 2016
+    https://www.vicanek.de/articles/BiquadFits.pdf
+    C++ by StoneyDSP
     Created: 14 Jul 2022 8:13:32pm
-    Author:  natha
 
   ==============================================================================
 */
@@ -207,117 +209,164 @@ SampleType MatchedBiquad<SampleType>::directFormIITransposed(int channel, Sample
 template <typename SampleType>
 void MatchedBiquad<SampleType>::coeffs()
 {
-    auto cosh = [&](SampleType z) { return (std::exp(z) + std::exp(-z)) * zeroFive; };
-    auto powTwo = [&](SampleType x) { return x * x; };
+    const auto AA0, AA1, AA2, phi1, phi0, phi2, r1, r2, BB0, BB1, BB2;
+
+    const auto _test;
+
+    const auto powTwo = [&](SampleType x) { return x * x; };
+    const auto powXY = [&](SampleType x, SampleType y) { return std::pow(x, y); };
+    const auto sin = [&](SampleType x) { return std::sin(x); };
+    const auto cos = [&](SampleType x) { return std::cos(x); };
+    const auto sqrt = [&](SampleType a) { return std::sqrt(a); };
+    const auto exp = [&](SampleType x) { return std::exp(x); };
+    const auto cosh = [&](SampleType z) { return (exp(z) + exp(-z)) * zeroFive; };
 
     f0 = f / (static_cast<SampleType>(sampleRate) / two);
-    AA = std::pow(ten, g / twenty);
+    AA = powXY(ten, g / twenty);
+    const auto& pifo = pi * f0;
 
     switch (type)
     {
     case FilterType::PeakEQ:
 
-        alfa = std::sin(f0 * pi) / (two * std::sqrt(AA) * q);
+        alfa = sin(pifo) / (two * sqrt(AA) * q);
 
         // Poles
-        
+
         a_[0] = one;
-        a_[1] = minusTwo * std::cos(f0 * pi) / (one + alfa);
+        a_[1] = minusTwo * cos(pifo) / (one + alfa);
         a_[2] = (one - alfa) / (one + alfa);
 
         // Zeros
         b_[0] = (one + AA * alfa) / (one + alfa);
-        b_[1] = a_[1];
+        b_[1] = minusTwo * cos(pifo) / (one + alfa);
         b_[2] = (one - AA * alfa) / (one + alfa);
 
         break;
 
     case FilterType::HighPass:
 
-        alfa = std::sin(f0 * pi) / (two * q);
+        alfa = sin(pifo) / (two * q);
 
         // Poles
         a_[0] = one;
-        a_[1] = minusTwo * std::cos(f0 * pi) / (one + alfa);
+        a_[1] = minusTwo * cos(pifo) / (one + alfa);
         a_[2] = (one - alfa) / (one + alfa);
 
         // Zeros
-        b_[0] = (one - a_[1] + a_[2]) / (two * two);
-        b_[1] = minusTwo * b_[0];
-        b_[2] = b_[0];
+        b_[0] = ((one - a_[1] + a_[2]) / four);
+        b_[1] = minusTwo * ((one - a_[1] + a_[2]) / four);
+        b_[2] = (one - a_[1] + a_[2]) / four;
 
         break;
 
     case FilterType::LowPass:
 
-        alfa = std::sin(f0 * pi) / (two * q);
+        alfa = sin(pifo) / (two * q);
 
         // Poles
         a_[0] = one;
-        a_[1] = minusTwo * std::cos(f0 * pi) / (one + alfa);
+        a_[1] = minusTwo * cos(pifo) / (one + alfa);
         a_[2] = (one - alfa) / (one + alfa);
 
         // # Zeros
-        b_[0] = (one + a_[1] + a_[2]) / (two * two);
-        b_[1] = two * b_[0];
-        b_[2] = b_[0];
+        b_[0] = (one + a_[1] + a_[2]) / four;
+        b_[1] = two * ((one + a_[1] + a_[2]) / four);
+        b_[2] = (one + a_[1] + a_[2]) / four;
 
         break;
 
     case FilterType::BandPass:
 
-        alfa = std::sin(f0 * pi) / (two * q);
+        alfa = sin(pifo) / (two * q);
 
         // Poles
         a_[0] = one;
-        a_[1] = minusTwo * std::cos(f0 * pi) / (one + alfa);
+        a_[1] = minusTwo * cos(pifo) / (one + alfa);
         a_[2] = (one - alfa) / (one + alfa);
 
         // Zeros
         b_[0] = (one - a_[2]) / two;
         b_[1] = zero;
-        b_[2] = -b_[0];
+        b_[2] = -((one - a_[2]) / two);
 
         break;
 
     case FilterType::MPeakEQ:
 
+
         // Poles
         a_[0] = one;
-        a_[2] = std::exp((- zeroFive) * pi * f0 / (std::sqrt(AA) * q));
-        //_test = four * AA * q * q;
+        a_[2] = exp((-zeroFive) * pifo / (sqrt(AA) * q));
+        _test = four * AA * q * q;
 
-        (four * AA * q * q > one) ?   // complex conjugate poles
-            (
-                a_[1] = minusTwo * a_[2] * std::cos(std::sqrt(one - one / (four * AA * q * q)) * pi * f0);
-        ) :                 // real poles
-            (
-                a_[1] = minusTwo * a_[2] * cosh(std::sqrt(one / (four * AA * q * q) - one) * pi * f0);
-        );
-        a_[2] = a_[2] * a_[2];
+        if ((_test > one) == true)
+        {
+            // complex conjugate poles
+            a_[1] = minusTwo * a_[2] * cos(sqrt(one - one / (four * AA * q * q)) * pifo);
+        }
+        else
+        {
+            // real poles
+            a_[1] = minusTwo * a_[2] * cosh(sqrt(one / (four * AA * q * q) - one) * pifo);
+        }
+
+        a_[2] = powXY(a_[2], two);
 
         // Zeros
-        const auto AA0 = powTwo(one + a_[1] + a_[2]);
-        const auto AA1 = powTwo(one - a_[1] + a_[2]);
-        const auto AA2 = (-four) * a_[2];
+        AA0 = powXY(one + a_[1] + a_[2], two);
+        AA1 = powXY(one - a_[1] + a_[2], two);
+        AA2 = (-four) * a_[2];
 
-        const auto phi1 = powTwo(std::sin(zeroFive * pi * f0));
-        const auto phi0 = one - phi1;
-        const auto phi2 = four * phi0 * phi1;
+        phi1 = powXY(sin(zeroFive * pifo), two);
+        phi0 = one - phi1;
+        phi2 = four * phi0 * phi1;
 
-        const auto r1 = powTwo((phi0 * AA0 + phi1 * AA1 + phi2 * AA2) * AA);
-        const auto r2 = powTwo((AA1 - AA0 + four * (phi0 - phi1) * AA2) * AA);
+        r1 = (phi0 * AA0 + phi1 * AA1 + phi2 * AA2) * powXY(AA, two);
+        r2 = (AA1 - AA0 + four * (phi0 - phi1) * AA2) * powXY(AA, two);
 
-        const auto BB0 = AA0;
-        const auto BB2 = (r1 - phi1 * r2 - BB0) / (powTwo(four * phi1));
-        const auto BB1 = r2 + BB0 + four * (phi1 - phi0) * BB2;
+        BB0 = AA0;
+        BB2 = (r1 - phi1 * r2 - BB0) / (four * powXY(phi1, two));
+        BB1 = r2 + BB0 + four * (phi1 - phi0) * BB2;
 
-        b_[1] = zeroFive * (one + a_[1] + a_[2] - std::sqrt(BB1));
-        const auto w = one + a_[1] + a_[2] - b_[1];
-        b_[0] = zeroFive * (w + std::sqrt(w ^ 2 + BB2));
-        b_[2] = -BB2 / (four * b_[0]);
+        b_[1] = zeroFive * (one + a_[1] + a_[2] - sqrt(BB1));
+        w = one + a_[1] + a_[2] - b_[1];
+        b_[0] = zeroFive * (w + sqrt(powXY(w, two) + BB2));
+        b_[2] = (-BB2) / (four * b_[0]);
 
         break;
+
+    case FilterType::MHighPass:
+
+        // Poles
+        a_[0] = one;
+        a_[2] = exp((-zeroFive) * pifo / q);
+        _test = two * q;
+
+        if ((_test > one) == true)
+        {
+            // complex conjugate poles
+            a_[1] = minusTwo * a_[2] * cos(sqrt(one - one / (four * q * q)) * pifo);
+        }
+        else
+        {
+            a_[1] = minusTwo * a_[2] * cosh(sqrt(one / (four * q * q) - 1) * pifo);
+        }
+
+        a_[2] = powXY(a_[2], two);
+
+        //Zeros
+        AA0 = powXY((one + a_[1] + a_[2]), two);
+        AA1 = powXY((one - a_[1] + a_[2]), two);
+        AA2 = (-four) * a_[2];
+
+        phi1 = powXY(sin(zeroFive * pifo), two);
+        phi0 = one - phi1;
+        phi2 = four * phi0 * phi1;
+
+        b_[0] = q * sqrt(phi0 * AA0 + phi1 * AA1 + phi2 * AA2) / (four * phi1);
+        b_[1] = minusTwo * (q * sqrt(phi0 * AA0 + phi1 * AA1 + phi2 * AA2) / (four * phi1));
+        b_[2] = q * sqrt(phi0 * AA0 + phi1 * AA1 + phi2 * AA2) / (four * phi1);
     }
 
     a[0] = (one / a_[0]);

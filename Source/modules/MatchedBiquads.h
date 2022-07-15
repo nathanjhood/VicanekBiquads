@@ -3,16 +3,12 @@
 
     MatchedBiquads.h
     Author:  Martin Vicanek 2016
+    https://www.vicanek.de/articles/BiquadFits.pdf
     C++ by StoneyDSP
     Created: 14 Jul 2022 8:13:32pm
 
   ==============================================================================
 */
-
-// Match BiQuad Filter
-// https://www.vicanek.de/articles/BiquadFits.pdf
-// by Martin Vicanek 2016
-// JSFX by TBProAudio 2019 
 
 #pragma once
 
@@ -28,9 +24,9 @@ enum struct FilterType
     HighPass, 
     LowPass,
     BandPass,
-    MPeakEQ 
-    /*MHighPass, 
-    MLowPass, 
+    MPeakEQ,
+    MHighPass, 
+    /*MLowPass, 
     MBandPass*/
 };
 
@@ -127,12 +123,11 @@ private:
     Coefficient<SampleType> a[3], b[3];
 
     /** Coefficient calculation */
-    SampleType a_[3];
-    SampleType b_[3];
+    Coefficient<SampleType> a_[3], b_[3];
 
     std::vector<SampleType> Wn_1, Wn_2, Xn_1, Xn_2, Yn_1, Yn_2;
 
-    SampleType f, g, q, loop, outputSample, AA, f0, alfa;
+    SampleType f, g, q, loop, outputSample, AA, f0, alfa, w;
     FilterType type = FilterType::LowPass;
     TransformationType transformType = TransformationType::directFormIItransposed;
 
@@ -254,6 +249,8 @@ b0 = (1 - a2) / 2;
 b1 = 0;
 b2 = -b0;
 ) :
+
+
     (ftype == 4) ? // MPeak EQ
     (
         AA = pow(10.0, g / 20.0);
