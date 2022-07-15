@@ -78,7 +78,7 @@ void ProcessWrapper<SampleType>::update()
     mixer.setWetMixProportion(mixPtr->get() * 0.01f);
 
     filter.setFrequency(frequencyPtr->get());
-    filter.setResonance(resonancePtr->get() * 10.f);
+    filter.setResonance(resonancePtr->get());
     filter.setGain(gainPtr->get());
     filter.setFilterType(static_cast<FilterType>(typePtr->getIndex()));
     filter.setTransformType(static_cast<TransformationType>(transformPtr->getIndex()));
