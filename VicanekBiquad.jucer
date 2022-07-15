@@ -10,7 +10,6 @@
       <FILE id="SoDd6Y" name="AutoComponent.cpp" compile="1" resource="0"
             file="Source/components/AutoComponent.cpp"/>
       <FILE id="hsCCEW" name="AutoComponent.h" compile="0" resource="0" file="Source/components/AutoComponent.h"/>
-      <FILE id="mFv1Da" name="AutoKnob.h" compile="0" resource="0" file="Source/components/AutoKnob.h"/>
       <FILE id="UFycbr" name="AutoMeter.h" compile="0" resource="0" file="Source/components/AutoMeter.h"/>
     </GROUP>
     <GROUP id="{57BD95B3-039F-99D6-2426-E5774F5C6321}" name="modules">
@@ -20,6 +19,8 @@
             file="Source/modules/MatchedBiquads.cpp"/>
       <FILE id="ud8zZH" name="MatchedBiquads.h" compile="0" resource="0"
             file="Source/modules/MatchedBiquads.h"/>
+      <FILE id="EBECKA" name="Transforms.cpp" compile="1" resource="0" file="Source/modules/Transforms.cpp"/>
+      <FILE id="GGZ68l" name="Transforms.h" compile="0" resource="0" file="Source/modules/Transforms.h"/>
     </GROUP>
     <GROUP id="{C5A8FEA9-0E1C-359C-7521-1EC4DDFA7F18}" name="Source">
       <FILE id="DGj5Zm" name="PluginParameters.cpp" compile="1" resource="0"
