@@ -25,7 +25,7 @@ enum struct FilterType
     LowPass,
     BandPass,
     MPeakEQ,
-    MHighPass, 
+    MHighPass
     /*MLowPass, 
     MBandPass*/
 };

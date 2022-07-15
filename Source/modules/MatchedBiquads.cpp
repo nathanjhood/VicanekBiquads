@@ -209,9 +209,9 @@ SampleType MatchedBiquad<SampleType>::directFormIITransposed(int channel, Sample
 template <typename SampleType>
 void MatchedBiquad<SampleType>::coeffs()
 {
-    const auto AA0, AA1, AA2, phi1, phi0, phi2, r1, r2, BB0, BB1, BB2;
+    SampleType AA0, AA1, AA2, phi1, phi0, phi2, r1, r2, BB0, BB1, BB2;
 
-    const auto _test;
+    SampleType _test;
 
     const auto powTwo = [&](SampleType x) { return x * x; };
     const auto powXY = [&](SampleType x, SampleType y) { return std::pow(x, y); };
