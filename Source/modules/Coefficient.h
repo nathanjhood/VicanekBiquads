@@ -21,9 +21,9 @@ template <typename SampleType>
 class Coefficient
 {
 public:
-    Coefficient();
+    Coefficient(SampleType initVal = {0.0});
     //Coefficient(const Coefficient& other) noexcept;
-    //~Coefficient();
+    ~Coefficient();
 
     //==========================================================================
     /** Returns the coefficient's current value. */
@@ -36,26 +36,26 @@ public:
     /** Changes the coefficient's current value. */
     Coefficient& operator= (SampleType newValue);
 
-    /** Atomically adds a number from the coefficient value, returning the new value. */
-    //Coefficient& operator+= (SampleType amountToAdd) noexcept { return value += amountToAdd; }
+    ///** Atomically adds a number from the coefficient value, returning the new value. */
+    //SampleType& operator+= (SampleType amountToAdd) noexcept { return value += amountToAdd; }
 
-    /** Atomically subtracts a number from the coefficient value, returning the new value. */
-    //Coefficient& operator-= (SampleType amountToSub) noexcept { return value -= amountToSub; }
+    ///** Atomically subtracts a number from the coefficient value, returning the new value. */
+    //SampleType& operator-= (SampleType amountToSub) noexcept { return value -= amountToSub; }
 
-    /** Atomically multiplies the coefficient by a number, returning the new value. */
-    //Coefficient& operator*= (SampleType amountToMul) noexcept { return value *= amountToMul; }
+    ///** Atomically multiplies the coefficient by a number, returning the new value. */
+    //SampleType& operator*= (SampleType amountToMul) noexcept { return value *= amountToMul; }
 
-    /** Atomically divides the coefficient by a number, returning the new value. */
-    //Coefficient& operator/= (SampleType amountToDiv) noexcept { return value /= amountToDiv; }
+    ///** Atomically divides the coefficient by a number, returning the new value. */
+    //SampleType& operator/= (SampleType amountToDiv) noexcept { return value /= amountToDiv; }
 
-    /** Atomically increments this value, returning the new value. */
-    //Coefficient& operator++() noexcept { return ++value; }
+    ///** Atomically increments this value, returning the new value. */
+    //SampleType& operator++() noexcept { return ++value; }
 
-    /** Atomically decrements this value, returning the new value. */
-    //Coefficient& operator--() noexcept { return --value; }
+    ///** Atomically decrements this value, returning the new value. */
+    //SampleType& operator--() noexcept { return --value; }
 
-    /** Atomically inverts this value, returning the new value. */
-    //Coefficient& operator-() noexcept { return -value.load(); };
+    ///** Atomically inverts this value, returning the new value. */
+    //SampleType& operator-() noexcept { return -value; };
 
 protected:
     //==========================================================================
