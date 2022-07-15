@@ -227,70 +227,6 @@ void MatchedBiquad<SampleType>::coeffs()
 
     switch (type)
     {
-    case FilterType::PeakEQ:
-
-        alfa = sin(pifo) / (two * sqrt(AA) * q);
-
-        // Poles
-
-        a_[0] = one;
-        a_[1] = minusTwo * cos(pifo) / (one + alfa);
-        a_[2] = (one - alfa) / (one + alfa);
-
-        // Zeros
-        b_[0] = (one + AA * alfa) / (one + alfa);
-        b_[1] = minusTwo * cos(pifo) / (one + alfa);
-        b_[2] = (one - AA * alfa) / (one + alfa);
-
-        break;
-
-    case FilterType::HighPass:
-
-        alfa = sin(pifo) / (two * q);
-
-        // Poles
-        a_[0] = one;
-        a_[1] = minusTwo * cos(pifo) / (one + alfa);
-        a_[2] = (one - alfa) / (one + alfa);
-
-        // Zeros
-        b_[0] = ((one - a_[1] + a_[2]) / four);
-        b_[1] = minusTwo * ((one - a_[1] + a_[2]) / four);
-        b_[2] = (one - a_[1] + a_[2]) / four;
-
-        break;
-
-    case FilterType::LowPass:
-
-        alfa = sin(pifo) / (two * q);
-
-        // Poles
-        a_[0] = one;
-        a_[1] = minusTwo * cos(pifo) / (one + alfa);
-        a_[2] = (one - alfa) / (one + alfa);
-
-        // # Zeros
-        b_[0] = (one + a_[1] + a_[2]) / four;
-        b_[1] = two * ((one + a_[1] + a_[2]) / four);
-        b_[2] = (one + a_[1] + a_[2]) / four;
-
-        break;
-
-    case FilterType::BandPass:
-
-        alfa = sin(pifo) / (two * q);
-
-        // Poles
-        a_[0] = one;
-        a_[1] = minusTwo * cos(pifo) / (one + alfa);
-        a_[2] = (one - alfa) / (one + alfa);
-
-        // Zeros
-        b_[0] = (one - a_[2]) / two;
-        b_[1] = zero;
-        b_[2] = -((one - a_[2]) / two);
-
-        break;
 
     case FilterType::MPeakEQ:
 
@@ -367,6 +303,149 @@ void MatchedBiquad<SampleType>::coeffs()
         b_[0] = q * sqrt(phi0 * AA0 + phi1 * AA1 + phi2 * AA2) / (four * phi1);
         b_[1] = minusTwo * (q * sqrt(phi0 * AA0 + phi1 * AA1 + phi2 * AA2) / (four * phi1));
         b_[2] = q * sqrt(phi0 * AA0 + phi1 * AA1 + phi2 * AA2) / (four * phi1);
+
+        break;
+
+    case FilterType::MLowPass:
+
+        // Poles
+        a_[0] = one;
+        a_[2] = exp((-zeroFive) * pifo / q);
+
+        _test = two * q;
+
+        if ((_test > one) == true)
+        {
+            a_[1] = minusTwo * a_[2] * cos(sqrt(one - one / (four * q * q)) * pifo);
+        }
+        else
+        {
+            a_[1] = minusTwo * a_[2] * cosh(sqrt(one / (four * q * q) - one) * pifo);
+        }
+        a_[2] = powXY(a_[2], two);
+
+        // Zeros
+        AA0 = powXY((one + a_[1] + a_[2]), two);
+        AA1 = powXY((one - a_[1] + a_[2]), two);
+        AA2 = (-four) * a_[2];
+
+        phi1 = powXY(sin(zeroFive * pifo), two);
+        phi0 = one - phi1;
+        phi2 = four * phi0 * phi1;
+
+        r1 = (AA0 * phi0 + AA1 * phi1 + AA2 * phi2) * powXY(q, two);
+
+        BB1 = (r1 - AA0 * phi0) / phi1;
+
+        b_[0] = zeroFive * (sqrt(BB1) + one + a_[1] + a_[2]);
+        b_[1] = (one + a_[1] + a_[2] - b_[0]);
+        b_[2] = zero;
+
+        break;
+
+    case FilterType::MBandPass:
+
+        // Poles
+        a_[0] = one;
+        a_[2] = exp((-zeroFive) * pifo / q);
+        _test = two * q;
+
+        if ((_test > 1) == true)
+        {
+            a_[1] = minusTwo * a_[2] * cos(sqrt(one - one / (four * q * q)) * pifo);
+        }
+
+        else
+        {
+            a_[1] = minusTwo * a_[2] * cosh(sqrt(one / (four * q * q) - one) * pifo);
+        }
+        a_[2] = powXY(a_[2], two);
+
+        // Zeros
+        AA0 = powXY((one + a_[1] + a_[2]), two);
+        AA1 = powXY((one - a_[1] + a_[2]), two);
+        AA2 = (-four) * a_[2];
+
+        phi1 = powXY(sin(zeroFive * pifo), two);
+        phi0 = one - phi1;
+        phi2 = four * phi0 * phi1;
+
+        r1 = phi0 * AA0 + phi1 * AA1 + phi2 * AA2;
+        r2 = AA1 - AA0 + four * (phi0 - phi1) * AA2;
+
+        BB2 = (r1 - phi1 * r2) / (four * phi1 * phi1);
+        BB1 = r2 + four * (phi1 - phi0) * BB2;
+
+        b_[1] = (-zeroFive) * sqrt(BB1);
+        b_[0] = zeroFive * (sqrt(b_[1] * b_[1] + BB2) - b_[1]);
+        b_[2] = -b_[0] - b_[1];
+
+        break;
+
+    case FilterType::PeakEQ:
+
+        alfa = sin(pifo) / (two * sqrt(AA) * q);
+
+        // Poles
+
+        a_[0] = one;
+        a_[1] = minusTwo * cos(pifo) / (one + alfa);
+        a_[2] = (one - alfa) / (one + alfa);
+
+        // Zeros
+        b_[0] = (one + AA * alfa) / (one + alfa);
+        b_[1] = minusTwo * cos(pifo) / (one + alfa);
+        b_[2] = (one - AA * alfa) / (one + alfa);
+
+        break;
+
+    case FilterType::HighPass:
+
+        alfa = sin(pifo) / (two * q);
+
+        // Poles
+        a_[0] = one;
+        a_[1] = minusTwo * cos(pifo) / (one + alfa);
+        a_[2] = (one - alfa) / (one + alfa);
+
+        // Zeros
+        b_[0] = ((one - a_[1] + a_[2]) / four);
+        b_[1] = minusTwo * ((one - a_[1] + a_[2]) / four);
+        b_[2] = (one - a_[1] + a_[2]) / four;
+
+        break;
+
+    case FilterType::LowPass:
+
+        alfa = sin(pifo) / (two * q);
+
+        // Poles
+        a_[0] = one;
+        a_[1] = minusTwo * cos(pifo) / (one + alfa);
+        a_[2] = (one - alfa) / (one + alfa);
+
+        // # Zeros
+        b_[0] = (one + a_[1] + a_[2]) / four;
+        b_[1] = two * ((one + a_[1] + a_[2]) / four);
+        b_[2] = (one + a_[1] + a_[2]) / four;
+
+        break;
+
+    case FilterType::BandPass:
+
+        alfa = sin(pifo) / (two * q);
+
+        // Poles
+        a_[0] = one;
+        a_[1] = minusTwo * cos(pifo) / (one + alfa);
+        a_[2] = (one - alfa) / (one + alfa);
+
+        // Zeros
+        b_[0] = (one - a_[2]) / two;
+        b_[1] = zero;
+        b_[2] = -((one - a_[2]) / two);
+
+        break;
     }
 
     a[0] = (one / a_[0]);
