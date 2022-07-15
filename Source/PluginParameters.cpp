@@ -22,7 +22,7 @@ void Parameters::setParameterLayout(Params& params)
     const auto dBOut = juce::Decibels::gainToDecibels(0.5f, -120.0f) * 20.0f;
 
     const auto freqRange = juce::NormalisableRange<float>(20.00f, 20000.00f, 0.001f, 00.198894f);
-    const auto resRange = juce::NormalisableRange<float>(00.1f, 0.90f, 00.01f, 1.00f);
+    const auto resRange = juce::NormalisableRange<float>(00.0f, 1.00f, 00.01f, 1.00f);
     const auto gainRange = juce::NormalisableRange<float>(dBMin, dBMax, 0.01f, 1.00f);
     const auto mixRange = juce::NormalisableRange<float>(00.00f, 100.00f, 0.01f, 1.00f);
     const auto outputRange = juce::NormalisableRange<float>(dBOut, dBMax, 0.01f, 1.00f);

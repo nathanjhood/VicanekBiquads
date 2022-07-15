@@ -127,9 +127,9 @@ private:
 
     std::vector<SampleType> Wn_1, Wn_2, Xn_1, Xn_2, Yn_1, Yn_2;
 
-    SampleType f, g, q, loop, outputSample, AA, f0, alfa, w;
-    FilterType type = FilterType::LowPass;
-    TransformationType transformType = TransformationType::directFormIItransposed;
+    SampleType f, g, q, loop, outputSample, AA, f0, alfa, w, AA0, AA1, AA2, phi1, phi0, phi2, r1, r2, BB0, BB1, BB2, _test, minFreq, maxFreq;
+    FilterType type;
+    TransformationType transformType;
 
     //==========================================================================
     /** Initialised constant */

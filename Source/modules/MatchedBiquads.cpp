@@ -13,7 +13,17 @@
 #include "MatchedBiquads.h"
 
 template <typename SampleType>
-MatchedBiquad<SampleType>::MatchedBiquad()
+MatchedBiquad<SampleType>::MatchedBiquad() 
+    : 
+    a{ one, zero, zero }, b{ one, zero, zero }, 
+    a_{ one, zero, zero }, b_{ one, zero, zero },
+    f(zero), g(zero), q(zero), loop(zero), outputSample(zero), 
+    AA(zero), f0(zero), alfa(zero), w(zero),
+    AA0(zero), AA1(zero), AA2(zero), phi1(zero), phi0(zero), phi2(zero),
+    r1(zero), r2(zero), BB0(zero), BB1(zero), BB2(zero),
+    _test(zero), minFreq(zero), maxFreq(zero),
+    type(FilterType::MLowPass),
+    transformType(TransformationType::directFormIItransposed)
 {
     reset();
 }
@@ -21,9 +31,11 @@ MatchedBiquad<SampleType>::MatchedBiquad()
 template <typename SampleType>
 void MatchedBiquad<SampleType>::setFrequency(SampleType newFreq)
 {
+    jassert(minFreq <= newFreq && newFreq <= maxFreq);
+
     if (f != newFreq)
     {
-        f = newFreq;
+        f = juce::jlimit(minFreq, maxFreq, newFreq);
         coeffs();
     }
 }
@@ -41,12 +53,13 @@ void MatchedBiquad<SampleType>::setGain(SampleType newGain)
 template <typename SampleType>
 void MatchedBiquad<SampleType>::setResonance(SampleType newRes)
 {
+    jassert(zero <= newRes && newRes <= one);
 
     if (q != newRes)
     {
-        q = newRes;
+        q = one / juce::jlimit(SampleType(0.01), SampleType(1.0), newRes);
         coeffs();
-    };
+    }
 }
 
 template <typename SampleType>
@@ -85,6 +98,14 @@ void MatchedBiquad<SampleType>::prepare(juce::dsp::ProcessSpec spec)
     Xn_2.resize(spec.numChannels);
     Yn_1.resize(spec.numChannels);
     Yn_2.resize(spec.numChannels);
+
+    minFreq = static_cast <SampleType> (sampleRate / 24576.0);
+    maxFreq = static_cast <SampleType> (sampleRate / 2.125);
+
+    jassert(static_cast <SampleType> (sampleRate / 24576.0) >= minFreq && minFreq <= static_cast <SampleType> (sampleRate / 2.125));
+    jassert(static_cast <SampleType> (sampleRate / 24576.0) <= maxFreq && maxFreq >= static_cast <SampleType> (sampleRate / 2.125));
+
+    coeffs();
 }
 
 template <typename SampleType>
@@ -209,10 +230,7 @@ SampleType MatchedBiquad<SampleType>::directFormIITransposed(int channel, Sample
 template <typename SampleType>
 void MatchedBiquad<SampleType>::coeffs()
 {
-    SampleType AA0, AA1, AA2, phi1, phi0, phi2, r1, r2, BB0, BB1, BB2;
-
-    SampleType _test;
-
+    const auto div = [&](SampleType a, SampleType b) { return a / b; };
     const auto powTwo = [&](SampleType x) { return x * x; };
     const auto powXY = [&](SampleType x, SampleType y) { return std::pow(x, y); };
     const auto sin = [&](SampleType x) { return std::sin(x); };
@@ -222,7 +240,7 @@ void MatchedBiquad<SampleType>::coeffs()
     const auto cosh = [&](SampleType z) { return (exp(z) + exp(-z)) * zeroFive; };
 
     f0 = f / (static_cast<SampleType>(sampleRate) / two);
-    AA = powXY(ten, g / twenty);
+    AA = powXY(ten, div(g, twenty));
     const auto& pifo = pi * f0;
 
     switch (type)
@@ -262,13 +280,13 @@ void MatchedBiquad<SampleType>::coeffs()
         r2 = (AA1 - AA0 + four * (phi0 - phi1) * AA2) * powXY(AA, two);
 
         BB0 = AA0;
-        BB2 = (r1 - phi1 * r2 - BB0) / (four * powXY(phi1, two));
+        BB2 = div((r1 - phi1 * r2 - BB0), (four * powXY(phi1, two)));
         BB1 = r2 + BB0 + four * (phi1 - phi0) * BB2;
 
         b_[1] = zeroFive * (one + a_[1] + a_[2] - sqrt(BB1));
         w = one + a_[1] + a_[2] - b_[1];
         b_[0] = zeroFive * (w + sqrt(powXY(w, two) + BB2));
-        b_[2] = (-BB2) / (four * b_[0]);
+        b_[2] = div((-BB2), (four * b_[0]));
 
         break;
 
@@ -276,16 +294,17 @@ void MatchedBiquad<SampleType>::coeffs()
 
         // Poles
         a_[0] = one;
-        a_[2] = exp((-zeroFive) * pifo / q);
+        a_[2] = exp((-zeroFive) * div(pifo, q));
         _test = two * q;
 
         if ((_test > one) == true)
         {
-            // complex conjugate poles
+            // Complex conjugate poles
             a_[1] = minusTwo * a_[2] * cos(sqrt(one - one / (four * q * q)) * pifo);
         }
         else
         {
+            // Real poles
             a_[1] = minusTwo * a_[2] * cosh(sqrt(one / (four * q * q) - 1) * pifo);
         }
 
@@ -310,12 +329,13 @@ void MatchedBiquad<SampleType>::coeffs()
 
         // Poles
         a_[0] = one;
-        a_[2] = exp((-zeroFive) * pifo / q);
+        a_[2] = exp((-zeroFive) * div(pifo, q));
 
         _test = two * q;
 
         if ((_test > one) == true)
         {
+            // Complex conjugate poles
             a_[1] = minusTwo * a_[2] * cos(sqrt(one - one / (four * q * q)) * pifo);
         }
         else
@@ -335,7 +355,7 @@ void MatchedBiquad<SampleType>::coeffs()
 
         r1 = (AA0 * phi0 + AA1 * phi1 + AA2 * phi2) * powXY(q, two);
 
-        BB1 = (r1 - AA0 * phi0) / phi1;
+        BB1 = div((r1 - AA0 * phi0), phi1);
 
         b_[0] = zeroFive * (sqrt(BB1) + one + a_[1] + a_[2]);
         b_[1] = (one + a_[1] + a_[2] - b_[0]);
@@ -347,11 +367,12 @@ void MatchedBiquad<SampleType>::coeffs()
 
         // Poles
         a_[0] = one;
-        a_[2] = exp((-zeroFive) * pifo / q);
+        a_[2] = exp((-zeroFive) * div(pifo, q));
         _test = two * q;
 
         if ((_test > 1) == true)
         {
+            // Complex conjugate poles
             a_[1] = minusTwo * a_[2] * cos(sqrt(one - one / (four * q * q)) * pifo);
         }
 
@@ -373,7 +394,7 @@ void MatchedBiquad<SampleType>::coeffs()
         r1 = phi0 * AA0 + phi1 * AA1 + phi2 * AA2;
         r2 = AA1 - AA0 + four * (phi0 - phi1) * AA2;
 
-        BB2 = (r1 - phi1 * r2) / (four * phi1 * phi1);
+        BB2 = div((r1 - phi1 * r2), (four * phi1 * phi1));
         BB1 = r2 + four * (phi1 - phi0) * BB2;
 
         b_[1] = (-zeroFive) * sqrt(BB1);
