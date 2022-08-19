@@ -29,6 +29,11 @@ MatchedBiquad<SampleType>::MatchedBiquad()
 }
 
 template <typename SampleType>
+MatchedBiquad<SampleType>::~MatchedBiquad()
+{
+}
+
+template <typename SampleType>
 void MatchedBiquad<SampleType>::setFrequency(SampleType newFreq)
 {
     jassert(minFreq <= newFreq && newFreq <= maxFreq);
@@ -221,7 +226,7 @@ SampleType MatchedBiquad<SampleType>::directFormIITransposed(int channel, Sample
 
     Yn = ((Xn * b[0]) + (Xn2));
 
-    Xn2 = ((Xn * b[1]) + (Xn1)+(Yn * a[1]));
+    Xn2 = ((Xn * b[1]) + (Xn1) + (Yn * a[1]));
     Xn1 = ((Xn * b[2]) + (Yn * a[2]));
 
     return Yn;
@@ -471,7 +476,7 @@ void MatchedBiquad<SampleType>::coeffs()
 
     a[0] = (one / a_[0]);
     a[1] = ((-a_[1]) * a[0]);
-    a[2] = ((-a_[2]) * a[0]);
+    a[2] = ((-a_[2])* a[0]);
     b[0] = (b_[0] * a[0]);
     b[1] = (b_[1] * a[0]);
     b[2] = (b_[2] * a[0]);

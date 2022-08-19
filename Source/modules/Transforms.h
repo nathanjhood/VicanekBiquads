@@ -28,6 +28,7 @@ template <typename SampleType>
 class IIRTransforms
 {
     IIRTransforms();
+    ~IIRTransforms();
 
     /** Sets the BiLinear Transform for the filter to use. See enum for available types. */
     void setTransformType(TransformationType newTransformType);
@@ -77,7 +78,7 @@ class IIRTransforms
 #endif
     }
 
-private:
+//protected:
     //==========================================================================
     /** Processes one sample at a time on a given channel. */
     SampleType processSample(int channel, SampleType inputSample);

@@ -16,6 +16,7 @@
 #define MATCHEDBIQUADS_H_INCLUDED
 
 #include <JuceHeader.h>
+
 #include "Coefficient.h"
 
 enum struct FilterType
@@ -43,6 +44,7 @@ class MatchedBiquad
 {
 public:
     MatchedBiquad();
+    ~MatchedBiquad();
 
     //==========================================================================
     /** Sets the centre Frequency of the filter. Range = 20..20000 */
@@ -136,7 +138,7 @@ private:
     const SampleType zero = 0.0, one = 1.0, two = 2.0, minusOne = -1.0, minusTwo = -2.0, zeroFive = 0.5, four = 4.0, ten = 10.0, twenty = 20.0;
     const SampleType pi = juce::MathConstants<SampleType>::pi;
     const SampleType root2 = juce::MathConstants<SampleType>::sqrt2;
-    double sampleRate = 44100.0;
+    double sampleRate = 48000.0;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MatchedBiquad)
 };

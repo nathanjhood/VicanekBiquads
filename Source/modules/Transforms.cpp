@@ -17,6 +17,12 @@ IIRTransforms<SampleType>::IIRTransforms()
 }
 
 template <typename SampleType>
+IIRTransforms<SampleType>::~IIRTransforms()
+{
+
+}
+
+template <typename SampleType>
 void IIRTransforms<SampleType>::setTransformType(TransformationType newTransformType)
 {
     if (transformType != newTransformType)
@@ -92,7 +98,7 @@ SampleType IIRTransforms<SampleType>::directFormI(int channel, SampleType& input
     auto& Xn = inputSample;
     auto& Yn = outputSample;
 
-    Yn = ((Xn * b[0]) + (Xn1 * b[1]) + (Xn2 * b[2]) + (Yn1 * a[1]) + (Yn2 * a[2]));
+    Yn = ((Xn *= b[0]) + (Xn1 *= b[1]) + (Xn2 *= b[2]) + (Yn1 *= a[1]) + (Yn2 *= a[2]));
 
     Xn2 = Xn1;
     Yn2 = Yn1;
@@ -112,8 +118,8 @@ SampleType IIRTransforms<SampleType>::directFormII(int channel, SampleType& inpu
     auto& Xn = inputSample;
     auto& Yn = outputSample;
 
-    Wn = (Xn + ((Wn1 * a[1]) + (Wn2 * a[2])));
-    Yn = ((Wn * b[0]) + (Wn1 * b[1]) + (Wn2 * b[2]));
+    Wn = (Xn + ((Wn1 *= a[1]) + (Wn2 *= a[2])));
+    Yn = ((Wn *= b[0]) + (Wn1 *= b[1]) + (Wn2 *= b[2]));
 
     Wn2 = Wn1;
     Wn1 = Wn;
@@ -134,12 +140,12 @@ SampleType IIRTransforms<SampleType>::directFormITransposed(int channel, SampleT
     auto& Yn = outputSample;
 
     Wn = (Xn + Wn2);
-    Yn = ((Wn * b[0]) + Xn2);
+    Yn = ((Wn *= b[0]) + Xn2);
 
-    Xn2 = ((Wn * b[1]) + Xn1);
-    Wn2 = ((Wn * a[1]) + Wn1);
-    Xn1 = (Wn * b[2]);
-    Wn1 = (Wn * a[2]);
+    Xn2 = ((Wn *= b[1]) + Xn1);
+    Wn2 = ((Wn *= a[1]) + Wn1);
+    Xn1 = (Wn *= b[2]);
+    Wn1 = (Wn *= a[2]);
 
     return Yn;
 }
@@ -153,10 +159,10 @@ SampleType IIRTransforms<SampleType>::directFormIITransposed(int channel, Sample
     auto& Xn = inputSample;
     auto& Yn = outputSample;
 
-    Yn = ((Xn * b[0]) + (Xn2));
+    Yn = ((Xn *= b[0]) + (Xn2));
 
-    Xn2 = ((Xn * b[1]) + (Xn1)+(Yn * a[1]));
-    Xn1 = ((Xn * b[2]) + (Yn * a[2]));
+    Xn2 = ((Xn *= b[1]) + (Xn1) + (Yn *= a[1]));
+    Xn1 = ((Xn *= b[2]) + (Yn *= a[2]));
 
     return Yn;
 }

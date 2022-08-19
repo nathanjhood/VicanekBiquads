@@ -25,6 +25,24 @@ ProcessWrapper<SampleType>::ProcessWrapper(VicanekBiquadAudioProcessor& p)
     outputPtr(dynamic_cast <juce::AudioParameterFloat*> (p.getAPVTS().getParameter("outputID"))),
     mixPtr(dynamic_cast <juce::AudioParameterFloat*> (p.getAPVTS().getParameter("mixID")))
 {
+    assertions();
+}
+
+template <typename SampleType>
+ProcessWrapper<SampleType>::~ProcessWrapper()
+{
+    ptrKill(frequencyPtr);
+    ptrKill(resonancePtr);
+    ptrKill(gainPtr);
+    ptrKill(typePtr);
+    ptrKill(transformPtr);
+    ptrKill(outputPtr);
+    ptrKill(mixPtr);
+}
+
+template <typename SampleType>
+void ProcessWrapper<SampleType>::assertions()
+{
     jassert(frequencyPtr != nullptr);
     jassert(resonancePtr != nullptr);
     jassert(gainPtr != nullptr);
@@ -32,7 +50,14 @@ ProcessWrapper<SampleType>::ProcessWrapper(VicanekBiquadAudioProcessor& p)
     jassert(transformPtr != nullptr);
     jassert(outputPtr != nullptr);
     jassert(mixPtr != nullptr);
+}
 
+template <typename SampleType>
+void ProcessWrapper<SampleType>::ptrKill(juce::RangedAudioParameter* paramPtr)
+{
+    paramPtr = nullptr;
+    delete paramPtr;
+    jassert(paramPtr == nullptr);
 }
 
 template <typename SampleType>
@@ -82,6 +107,7 @@ void ProcessWrapper<SampleType>::update()
     filter.setGain(gainPtr->get());
     filter.setFilterType(static_cast<FilterType>(typePtr->getIndex()));
     filter.setTransformType(static_cast<TransformationType>(transformPtr->getIndex()));
+
     output.setGainDecibels(outputPtr->get());
 };
 

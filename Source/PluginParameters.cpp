@@ -11,7 +11,7 @@
 #include "PluginParameters.h"
 #include "PluginProcessor.h"
 
-Parameters::Parameters(VicanekBiquadAudioProcessor& p) : audioProcessor(p), state(p.getAPVTS())
+Parameters::Parameters(VicanekBiquadAudioProcessor& p) : audioProcessor(p)
 {
 }
 

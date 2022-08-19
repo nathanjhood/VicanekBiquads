@@ -25,6 +25,10 @@ public:
     //==============================================================================
     /** Constructor. */
     ProcessWrapper(VicanekBiquadAudioProcessor& p);
+    ~ProcessWrapper();
+
+    void assertions();
+    void ptrKill(juce::RangedAudioParameter* paramPtr);
 
     //==========================================================================
     /** Initialises the processor. */
@@ -59,7 +63,7 @@ private:
     juce::AudioParameterFloat* frequencyPtr{ nullptr };
     juce::AudioParameterFloat* resonancePtr{ nullptr };
     juce::AudioParameterFloat* gainPtr{ nullptr };
-    juce::AudioParameterChoice* typePtr;
+    juce::AudioParameterChoice* typePtr{ nullptr };
     juce::AudioParameterChoice* transformPtr{ nullptr };
     juce::AudioParameterFloat* outputPtr{ nullptr };
     juce::AudioParameterFloat* mixPtr{ nullptr };

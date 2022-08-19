@@ -180,6 +180,12 @@ void VicanekBiquadAudioProcessor::releaseResources()
     processorDouble.reset();
 }
 
+void VicanekBiquadAudioProcessor::reset()
+{
+    processorFloat.reset();
+    processorDouble.reset();
+}
+
 #ifndef JucePlugin_PreferredChannelConfigurations
 bool VicanekBiquadAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
 {
@@ -315,11 +321,16 @@ juce::AudioProcessorValueTreeState::ParameterLayout VicanekBiquadAudioProcessor:
 {
     juce::AudioProcessorValueTreeState::ParameterLayout params;
 
+    //std::vector<std::unique_ptr<juce::RangedAudioParameter>> params;;
+
     params.add(std::make_unique<juce::AudioParameterBool>("bypassID", "Bypass", false));
+    //params.emplace_back(std::make_unique<juce::AudioParameterBool>("bypassID", "Bypass", false));
 
     Parameters::setParameterLayout(params);
 
     return params;
+
+    //return { params.begin(), params.end() };
 }
 
 //==============================================================================
